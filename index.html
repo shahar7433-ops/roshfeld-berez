@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רושפלד ברז</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0a0a2e 0%, #1a1a4e 30%, #0d0d3d 70%, #050520 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Water stain background effect */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse at 20% 50%, rgba(30, 100, 200, 0.05) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(30, 100, 200, 0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(30, 100, 200, 0.04) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .title {
+            margin-top: 40px;
+            font-size: clamp(1.4rem, 4vw, 2.8rem);
+            color: #e0e8ff;
+            text-align: center;
+            text-shadow: 0 0 20px rgba(100, 150, 255, 0.3), 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 1;
+            padding: 0 20px;
+            line-height: 1.6;
+            font-weight: 700;
+        }
+
+        .timer-container {
+            margin-top: 30px;
+            z-index: 1;
+            display: flex;
+            gap: 15px;
+            direction: ltr;
+        }
+
+        .timer-box {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(100, 150, 255, 0.2);
+            border-radius: 16px;
+            padding: 20px 25px;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .timer-box:hover {
+            transform: translateY(-3px);
+        }
+
+        .timer-value {
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            font-weight: 800;
+            color: #7db4ff;
+            text-shadow: 0 0 15px rgba(100, 150, 255, 0.4);
+            font-variant-numeric: tabular-nums;
+            direction: ltr;
+        }
+
+        .timer-label {
+            font-size: 0.9rem;
+            color: rgba(200, 215, 255, 0.6);
+            margin-top: 8px;
+            letter-spacing: 1px;
+        }
+
+        /* Faucet scene */
+        .faucet-scene {
+            margin-top: 30px;
+            position: relative;
+            width: 300px;
+            height: 420px;
+            z-index: 1;
+        }
+
+        /* Pipe coming from top */
+        .pipe {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 60px;
+            background: linear-gradient(90deg, #888 0%, #ccc 40%, #aaa 60%, #777 100%);
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Faucet body */
+        .faucet-body {
+            position: absolute;
+            top: 55px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 35px;
+            background: linear-gradient(90deg, #999 0%, #ddd 35%, #bbb 65%, #888 100%);
+            border-radius: 5px;
+        }
+
+        /* Faucet handle */
+        .faucet-handle {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%) rotate(-30deg);
+            width: 60px;
+            height: 12px;
+            background: linear-gradient(180deg, #aaa 0%, #ddd 50%, #999 100%);
+            border-radius: 6px;
+            transform-origin: right center;
+        }
+
+        .faucet-handle::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #ccc 0%, #888 100%);
+            border-radius: 50%;
+        }
+
+        /* Spout */
+        .faucet-spout {
+            position: absolute;
+            top: 85px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 20px;
+            background: linear-gradient(90deg, #888 0%, #ccc 40%, #aaa 60%, #777 100%);
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* Drip origin point */
+        .drip-origin {
+            position: absolute;
+            top: 105px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 4px;
+            background: rgba(100, 170, 255, 0.4);
+            border-radius: 0 0 50% 50%;
+        }
+
+        /* Water drops */
+        .drop {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 14px;
+            background: radial-gradient(ellipse at 40% 30%, rgba(150, 200, 255, 0.9) 0%, rgba(60, 130, 220, 0.7) 50%, rgba(30, 90, 180, 0.5) 100%);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            opacity: 0;
+            filter: blur(0.3px);
+        }
+
+        .drop.falling {
+            animation: dropFall 1s ease-in forwards;
+        }
+
+        @keyframes dropFall {
+            0% {
+                top: 108px;
+                opacity: 0.9;
+                transform: translateX(-50%) scale(0.6);
+            }
+            10% {
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+            70% {
+                opacity: 0.8;
+            }
+            85% {
+                opacity: 0.6;
+                transform: translateX(-50%) scale(1) scaleY(1.3);
+            }
+            100% {
+                top: 310px;
+                opacity: 0;
+                transform: translateX(-50%) scale(1.5, 0.5);
+            }
+        }
+
+        /* Splash effect */
+        .splash {
+            position: absolute;
+            top: 315px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 8px;
+            opacity: 0;
+        }
+
+        .splash.active {
+            animation: splashEffect 0.4s ease-out forwards;
+        }
+
+        @keyframes splashEffect {
+            0% {
+                opacity: 0.8;
+                transform: translateX(-50%) scale(0.3);
+            }
+            50% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) scale(2, 1);
+            }
+        }
+
+        .splash-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(100, 170, 255, 0.6);
+            border-radius: 50%;
+        }
+
+        .splash-dot:nth-child(1) { left: 0; animation: splashDot 0.4s ease-out forwards; }
+        .splash-dot:nth-child(2) { left: 13px; animation: splashDot 0.4s 0.05s ease-out forwards; }
+        .splash-dot:nth-child(3) { right: 0; animation: splashDot 0.4s 0.02s ease-out forwards; }
+
+        @keyframes splashDot {
+            0% { transform: translateY(0); opacity: 0.8; }
+            100% { transform: translateY(-15px); opacity: 0; }
+        }
+
+        /* Bucket */
+        .bucket {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 110px;
+        }
+
+        .bucket-body {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 100px;
+            background: linear-gradient(180deg, #5a5a6e 0%, #4a4a5e 50%, #3a3a4e 100%);
+            border-radius: 0 0 15px 15px;
+            clip-path: polygon(5% 0%, 95% 0%, 85% 100%, 15% 100%);
+            border: 2px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+
+        /* Water level in bucket */
+        .water-level {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background: linear-gradient(180deg,
+                rgba(80, 150, 255, 0.4) 0%,
+                rgba(40, 100, 200, 0.5) 40%,
+                rgba(20, 70, 170, 0.6) 100%
+            );
+            transition: height 0.5s ease;
+            overflow: hidden;
+        }
+
+        .water-level::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -10%;
+            width: 120%;
+            height: 8px;
+            background: rgba(120, 180, 255, 0.3);
+            border-radius: 50%;
+            animation: waterWobble 2s ease-in-out infinite;
+        }
+
+        @keyframes waterWobble {
+            0%, 100% { transform: translateX(-2px) scaleY(1); }
+            50% { transform: translateX(2px) scaleY(1.5); }
+        }
+
+        /* Bucket rim */
+        .bucket-rim {
+            position: absolute;
+            bottom: 98px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 126px;
+            height: 10px;
+            background: linear-gradient(180deg, #7a7a8e 0%, #5a5a6e 100%);
+            border-radius: 3px;
+        }
+
+        /* Bucket handle */
+        .bucket-handle {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 45px;
+            border: 4px solid #6a6a7e;
+            border-bottom: none;
+            border-radius: 50px 50px 0 0;
+        }
+
+        /* Bucket stripes */
+        .bucket-stripe {
+            position: absolute;
+            left: 10%;
+            width: 80%;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .bucket-stripe:nth-child(1) { bottom: 25px; }
+        .bucket-stripe:nth-child(2) { bottom: 50px; }
+        .bucket-stripe:nth-child(3) { bottom: 75px; }
+
+        /* Drop counter */
+        .drop-counter {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: rgba(200, 215, 255, 0.5);
+            z-index: 1;
+            direction: rtl;
+        }
+
+        .drop-count-value {
+            color: #7db4ff;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            body {
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+
+            .title {
+                margin-top: 25px;
+                font-size: clamp(1.1rem, 5vw, 1.6rem);
+                padding: 0 15px;
+                line-height: 1.5;
+            }
+
+            .timer-container {
+                gap: 6px;
+                margin-top: 20px;
+                flex-wrap: nowrap;
+            }
+
+            .timer-box {
+                padding: 10px 12px;
+                min-width: 60px;
+                border-radius: 12px;
+            }
+
+            .timer-value {
+                font-size: 1.6rem;
+            }
+
+            .timer-label {
+                font-size: 0.7rem;
+                margin-top: 4px;
+            }
+
+            .faucet-scene {
+                transform: scale(0.65);
+                transform-origin: top center;
+                margin-top: 5px;
+                height: 280px;
+            }
+
+            .drop-counter {
+                margin-top: 0;
+                font-size: 0.85rem;
+            }
+
+            .fun-fact-box {
+                padding: 25px 20px;
+                border-radius: 16px;
+                width: 92%;
+            }
+
+            .fun-fact-icon {
+                font-size: 2rem;
+                margin-bottom: 10px;
+            }
+
+            .fun-fact-title {
+                font-size: 1.2rem;
+            }
+
+            .fun-fact-text {
+                font-size: 0.95rem;
+                line-height: 1.6;
+            }
+
+            .fun-fact-close {
+                margin-top: 18px;
+                padding: 8px 25px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .timer-container {
+                gap: 4px;
+            }
+
+            .timer-box {
+                padding: 8px 8px;
+                min-width: 52px;
+            }
+
+            .timer-value {
+                font-size: 1.3rem;
+            }
+
+            .faucet-scene {
+                transform: scale(0.55);
+                height: 240px;
+            }
+        }
+
+        /* Seconds tick effect */
+        .tick {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(100, 150, 255, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Fun fact popup */
+        .fun-fact-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .fun-fact-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .fun-fact-box {
+            background: linear-gradient(135deg, #1a1a4e 0%, #0d0d3d 100%);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 20px;
+            padding: 35px 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(100, 150, 255, 0.1);
+            transform: scale(0.8) translateY(20px);
+            transition: transform 0.3s ease;
+            direction: rtl;
+        }
+
+        .fun-fact-overlay.visible .fun-fact-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .fun-fact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .fun-fact-title {
+            font-size: 1.4rem;
+            color: #7db4ff;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .fun-fact-text {
+            font-size: 1.1rem;
+            color: #c8d7ff;
+            line-height: 1.7;
+        }
+
+        .fun-fact-close {
+            margin-top: 25px;
+            padding: 10px 30px;
+            background: rgba(100, 150, 255, 0.15);
+            border: 1px solid rgba(100, 150, 255, 0.3);
+            border-radius: 10px;
+            color: #7db4ff;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .fun-fact-close:hover {
+            background: rgba(100, 150, 255, 0.25);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">זמן מאז הפעם האחרונה שרושפלד לא דפק ברז</h1>
+
+    <div class="timer-container">
+        <div class="timer-box">
+            <div class="timer-value" id="days">00</div>
+            <div class="timer-label">ימים</div>
+        </div>
+        <div class="timer-box">
+            <div class="timer-value" id="hours">00</div>
+            <div class="timer-label">שעות</div>
+        </div>
+        <div class="timer-box">
+            <div class="timer-value" id="minutes">00</div>
+            <div class="timer-label">דקות</div>
+        </div>
+        <div class="timer-box">
+            <div class="timer-value" id="seconds">00</div>
+            <div class="timer-label">שניות</div>
+        </div>
+    </div>
+
+    <div class="faucet-scene">
+        <div class="pipe"></div>
+        <div class="faucet-handle"></div>
+        <div class="faucet-body"></div>
+        <div class="faucet-spout"></div>
+        <div class="drip-origin"></div>
+
+        <div class="bucket">
+            <div class="bucket-handle"></div>
+            <div class="bucket-rim"></div>
+            <div class="bucket-body">
+                <div class="water-level" id="waterLevel">
+                    <div class="bucket-stripe"></div>
+                    <div class="bucket-stripe"></div>
+                    <div class="bucket-stripe"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="drop-counter">
+        <span class="drop-count-value" id="dropCount">0</span> טיפות נטפו
+    </div>
+
+    <!-- Fun fact popup -->
+    <div class="fun-fact-overlay" id="funFactOverlay">
+        <div class="fun-fact-box">
+            <div class="fun-fact-icon" id="funFactIcon">💧</div>
+            <div class="fun-fact-title">הידעת?</div>
+            <div class="fun-fact-text" id="funFactText"></div>
+            <button class="fun-fact-close" id="funFactClose">הבנתי!</button>
+        </div>
+    </div>
+
+    <script>
+        // Start date: January 1, 2026 00:00:00
+        const startDate = new Date('2026-01-01T00:00:00');
+        let dropCount = 0;
+
+        function updateTimer() {
+            const now = new Date();
+            const diff = now - startDate;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = String(days).padStart(2, '0');
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        function createDrop() {
+            const scene = document.querySelector('.faucet-scene');
+
+            // Create drop
+            const drop = document.createElement('div');
+            drop.className = 'drop';
+            scene.appendChild(drop);
+
+            // Trigger animation
+            requestAnimationFrame(() => {
+                drop.classList.add('falling');
+            });
+
+            // Create splash after drop lands
+            setTimeout(() => {
+                const splash = document.createElement('div');
+                splash.className = 'splash active';
+                splash.innerHTML = '<div class="splash-dot"></div><div class="splash-dot"></div><div class="splash-dot"></div>';
+                scene.appendChild(splash);
+
+                setTimeout(() => splash.remove(), 400);
+            }, 900);
+
+            // Remove drop after animation
+            setTimeout(() => {
+                drop.remove();
+            }, 1100);
+
+            // Update drop count
+            dropCount++;
+            document.getElementById('dropCount').textContent = dropCount.toLocaleString();
+
+            // Update water level (max 60%)
+            const maxDropsForFull = 3600; // fills up over an hour
+            const level = Math.min((dropCount / maxDropsForFull) * 60, 60);
+            document.getElementById('waterLevel').style.height = level + '%';
+        }
+
+        // Calculate initial drop count (one per second since start)
+        function initDropCount() {
+            const now = new Date();
+            const diff = now - startDate;
+            dropCount = Math.floor(diff / 1000);
+            document.getElementById('dropCount').textContent = dropCount.toLocaleString();
+
+            // Set initial water level (cycles every hour)
+            const secondsInHour = dropCount % 3600;
+            const level = Math.min((secondsInHour / 3600) * 60, 60);
+            document.getElementById('waterLevel').style.height = level + '%';
+        }
+
+        // Fun facts - things you could have done in the elapsed time
+        const funFacts = [
+            { icon: '🍳', text: 'בזמן שעבר, רושפלד היה יכול לבשל כ-{omelettes} חביתות. אבל הוא העדיף לדפוק ברזים.' },
+            { icon: '🚿', text: 'בזמן הזה, ברז פתוח היה מבזבז כ-{liters} ליטר מים. תודה רושפלד.' },
+            { icon: '🏃', text: 'אדם ממוצע היה יכול לרוץ כ-{km} קילומטרים בזמן הזה. רושפלד רץ לדפוק ברזים.' },
+            { icon: '📚', text: 'היה אפשר לקרוא כ-{books} ספרים בזמן שעבר. אבל לא, ברזים זה יותר כיף.' },
+            { icon: '🎬', text: 'היה אפשר לצפות ב-{movies} סרטים מלאים. במקום זה - ברזים.' },
+            { icon: '✈️', text: 'מטוס היה עובר כ-{flight_km} קילומטרים במהלך הזמן הזה. רושפלד העדיף ברזים.' },
+            { icon: '💤', text: 'היה אפשר לישון {sleeps} לילות שלמים של 8 שעות. אבל מי צריך שינה כשיש ברזים?' },
+            { icon: '🍕', text: 'היה אפשר לאכול כ-{pizzas} פיצות. אבל רושפלד שבע מברזים.' },
+            { icon: '🎵', text: 'היה אפשר להאזין ל-{songs} שירים. אבל הצליל של ברז זה המוזיקה של רושפלד.' },
+            { icon: '🧱', text: 'היה אפשר לבנות קיר מ-{bricks} לבנים. או סתם לדפוק ברז.' },
+            { icon: '🫧', text: 'ברז שמטפטף טיפה בשנייה מבזבז כ-{drip_liters} ליטר ביום. תודה רושפלד, ממש תודה.' },
+            { icon: '🐌', text: 'חילזון היה זוחל כ-{snail_m} מטרים בזמן הזה. אפילו הוא היה מספיק לתקן ברז.' },
+            { icon: '💡', text: 'נורה של 60 וואט הייתה צורכת כ-{watts} קילוואט-שעה בזמן הזה. ברזים לא צורכים חשמל, אבל כן סבלנות.' },
+            { icon: '🌍', text: 'כדור הארץ עבר כ-{earth_km} קילומטרים במסלולו סביב השמש. רושפלד עבר ברז.' },
+            { icon: '💧', text: 'עד עכשיו נטפו {drops} טיפות. כל טיפה היא דמעה של השכנים של רושפלד.' },
+            { icon: '🧔', text: 'הזקן של רושפלד גדל כ-{beard_mm} מילימטרים מאז. וכנראה גם הברז.' },
+            { icon: '☕', text: 'היה אפשר לשתות כ-{coffees} כוסות קפה. אבל רושפלד מעדיף מים מהברז.' },
+            { icon: '🚶', text: 'אדם ממוצע היה הולך כ-{steps} צעדים. רושפלד עשה צעד אחד - לכיוון הברז.' },
+            { icon: '🧻', text: 'היה אפשר לגלגל כ-{toilet_rolls} גלילי נייר טואלט. גם הם שימושיים יותר מברז דפוק.' },
+            { icon: '🐕', text: 'כלב היה מכשכש בזנב כ-{wags} פעמים. רושפלד כישכש בברז פעם אחת.' },
+        ];
+
+        let tickCount = 0;
+        let funFactVisible = false;
+
+        function getElapsedSeconds() {
+            return Math.floor((new Date() - startDate) / 1000);
+        }
+
+        function calculateFact(template) {
+            const totalSec = getElapsedSeconds();
+            const totalMin = totalSec / 60;
+            const totalHours = totalMin / 60;
+            const totalDays = totalHours / 24;
+
+            return template
+                .replace('{omelettes}', Math.floor(totalMin / 5).toLocaleString())
+                .replace('{liters}', Math.floor(totalSec * 0.1).toLocaleString())
+                .replace('{km}', (totalHours * 10).toFixed(1))
+                .replace('{books}', Math.floor(totalHours / 5).toLocaleString())
+                .replace('{movies}', Math.floor(totalMin / 120).toLocaleString())
+                .replace('{flight_km}', Math.floor(totalHours * 900).toLocaleString())
+                .replace('{sleeps}', Math.floor(totalHours / 8).toLocaleString())
+                .replace('{pizzas}', Math.floor(totalMin / 15).toLocaleString())
+                .replace('{songs}', Math.floor(totalMin / 3.5).toLocaleString())
+                .replace('{bricks}', Math.floor(totalMin * 2).toLocaleString())
+                .replace('{drip_liters}', Math.floor(totalDays * 8.64).toLocaleString())
+                .replace('{snail_m}', (totalHours * 50).toFixed(0))
+                .replace('{watts}', (totalHours * 0.06).toFixed(2))
+                .replace('{earth_km}', Math.floor(totalSec * 29.78).toLocaleString())
+                .replace('{drops}', totalSec.toLocaleString())
+                .replace('{beard_mm}', (totalDays * 0.4).toFixed(1))
+                .replace('{coffees}', Math.floor(totalHours / 0.5).toLocaleString())
+                .replace('{steps}', Math.floor(totalMin * 100).toLocaleString())
+                .replace('{toilet_rolls}', Math.floor(totalDays * 2).toLocaleString())
+                .replace('{wags}', Math.floor(totalMin * 30).toLocaleString());
+        }
+
+        function showFunFact() {
+            if (funFactVisible) return;
+            funFactVisible = true;
+
+            const fact = funFacts[Math.floor(Math.random() * funFacts.length)];
+            document.getElementById('funFactIcon').textContent = fact.icon;
+            document.getElementById('funFactText').textContent = calculateFact(fact.text);
+
+            const overlay = document.getElementById('funFactOverlay');
+            overlay.classList.add('visible');
+        }
+
+        function closeFunFact() {
+            const overlay = document.getElementById('funFactOverlay');
+            overlay.classList.remove('visible');
+            setTimeout(() => { funFactVisible = false; }, 300);
+        }
+
+        document.getElementById('funFactClose').addEventListener('click', closeFunFact);
+        document.getElementById('funFactOverlay').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeFunFact();
+        });
+
+        // Initialize
+        initDropCount();
+        updateTimer();
+
+        // Sync to exact second boundary
+        function scheduleNextTick() {
+            const now = new Date();
+            const msUntilNextSecond = 1000 - now.getMilliseconds();
+            setTimeout(() => {
+                updateTimer();
+                createDrop();
+                tickCount++;
+                if (tickCount % 10 === 0) {
+                    showFunFact();
+                }
+                scheduleNextTick();
+            }, msUntilNextSecond);
+        }
+        scheduleNextTick();
+    </script>
+</body>
+</html>

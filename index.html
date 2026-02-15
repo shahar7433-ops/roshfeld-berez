@@ -1009,7 +1009,6 @@
         ];
 
         let tickCount = 0;
-        let lastMinuteTriggered = -1;
         let funFactVisible = false;
 
         function getElapsedSeconds() {
@@ -1138,6 +1137,11 @@
         initDropCount();
         updateTimer();
 
+        // First Roshfeld appearance after 15 seconds
+        setTimeout(() => {
+            if (!roshfeldBusy) triggerRoshfeld();
+        }, 15000);
+
         // Sync to exact second boundary
         function scheduleNextTick() {
             const now = new Date();
@@ -1146,14 +1150,10 @@
                 updateTimer();
                 createDrop();
                 tickCount++;
-                if (tickCount % 10 === 0) {
+                if (tickCount % 10 === 0 && !roshfeldBusy) {
                     showFunFact();
                 }
-                // Trigger Roshfeld when real clock seconds hit :00
-                const nowSec = new Date().getSeconds();
-                const currentMinute = Math.floor(getElapsedSeconds() / 60);
-                if (nowSec === 0 && currentMinute !== lastMinuteTriggered) {
-                    lastMinuteTriggered = currentMinute;
+                if (tickCount % 60 === 0) {
                     triggerRoshfeld();
                 }
                 scheduleNextTick();

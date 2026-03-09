@@ -367,6 +367,7 @@
             opacity: 0;
             filter: blur(0.2px);
             box-shadow: 0 0 4px rgba(100, 180, 255, 0.2);
+            z-index: 1;
         }
 
         .drop.falling {
@@ -387,18 +388,18 @@
                 opacity: 0.85;
                 transform: translateX(-50%) scale(0.9);
             }
-            75% {
-                top: 320px;
-                opacity: 0.6;
+            80% {
+                top: 340px;
+                opacity: 0.7;
                 transform: translateX(-50%) scale(0.7) scaleY(1.5);
             }
-            90% {
-                top: 348px;
-                opacity: 0.1;
+            95% {
+                top: 395px;
+                opacity: 0.5;
                 transform: translateX(-50%) scale(0.5, 0.8);
             }
             100% {
-                top: 355px;
+                top: 420px;
                 opacity: 0;
                 transform: translateX(-50%) scale(0.3, 0.3);
             }
@@ -512,6 +513,7 @@
             transform: translateX(-50%);
             width: 130px;
             height: 115px;
+            z-index: 2;
         }
 
         .bucket-body {

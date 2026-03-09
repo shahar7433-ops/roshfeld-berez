@@ -391,8 +391,13 @@
                 opacity: 0.7;
                 transform: translateX(-50%) scale(0.7) scaleY(1.5);
             }
+            95% {
+                top: 390px;
+                opacity: 0.3;
+                transform: translateX(-50%) scale(0.8, 0.6);
+            }
             100% {
-                top: 380px;
+                top: 400px;
                 opacity: 0;
                 transform: translateX(-50%) scale(1.2, 0.3);
             }
@@ -401,7 +406,6 @@
         /* Ripple effect in water */
         .ripple {
             position: absolute;
-            top: 375px;
             left: 50%;
             transform: translateX(-50%);
             width: 6px;
@@ -410,6 +414,7 @@
             border: 1px solid rgba(150, 200, 255, 0.5);
             opacity: 0;
             pointer-events: none;
+            z-index: 3;
         }
 
         .ripple.active {
@@ -440,7 +445,6 @@
         /* Second ripple - slightly delayed and bigger */
         .ripple2 {
             position: absolute;
-            top: 375px;
             left: 50%;
             transform: translateX(-50%);
             width: 4px;
@@ -449,6 +453,7 @@
             border: 1px solid rgba(120, 180, 255, 0.3);
             opacity: 0;
             pointer-events: none;
+            z-index: 3;
         }
 
         .ripple2.active {
@@ -476,13 +481,13 @@
         /* Small splash droplets that fly up */
         .micro-splash {
             position: absolute;
-            top: 374px;
             width: 3px;
             height: 3px;
             background: rgba(180, 220, 255, 0.6);
             border-radius: 50%;
             opacity: 0;
             pointer-events: none;
+            z-index: 3;
         }
 
         .micro-splash.active {
@@ -864,6 +869,8 @@
 
         function createDrop() {
             const scene = document.querySelector('.faucet-scene');
+            const bucketBody = document.querySelector('.bucket-body');
+            const waterLevel = document.getElementById('waterLevel');
 
             const drop = document.createElement('div');
             drop.className = 'drop';
@@ -873,27 +880,35 @@
                 drop.classList.add('falling');
             });
 
-            // Ripple effects when drop hits water
+            // Ripple effects inside bucket at water surface
             setTimeout(() => {
+                const bucketH = bucketBody.offsetHeight;
+                const waterH = waterLevel.offsetHeight;
+                const surfaceTop = bucketH - waterH;
+
                 const ripple1 = document.createElement('div');
                 ripple1.className = 'ripple active';
-                scene.appendChild(ripple1);
+                ripple1.style.top = surfaceTop + 'px';
+                bucketBody.appendChild(ripple1);
                 setTimeout(() => ripple1.remove(), 1200);
 
                 const ripple2 = document.createElement('div');
                 ripple2.className = 'ripple2 active';
-                scene.appendChild(ripple2);
+                ripple2.style.top = surfaceTop + 'px';
+                bucketBody.appendChild(ripple2);
                 setTimeout(() => ripple2.remove(), 1700);
 
                 // Micro splash droplets
                 const splashL = document.createElement('div');
                 splashL.className = 'micro-splash left active';
-                scene.appendChild(splashL);
+                splashL.style.top = surfaceTop + 'px';
+                bucketBody.appendChild(splashL);
                 setTimeout(() => splashL.remove(), 500);
 
                 const splashR = document.createElement('div');
                 splashR.className = 'micro-splash right active';
-                scene.appendChild(splashR);
+                splashR.style.top = surfaceTop + 'px';
+                bucketBody.appendChild(splashR);
                 setTimeout(() => splashR.remove(), 500);
             }, 950);
 
